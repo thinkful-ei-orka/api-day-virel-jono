@@ -1,5 +1,5 @@
 
-
+let error = null;
 const items = [];
 let hideCheckeditems = false;
 
@@ -12,7 +12,7 @@ const addItem = function (item) {
 };
 
 function findAndUpdate (id, newData){
-  let currentItem = findById(id);
+  let currentItem = this.findById(id);
   Object.assign(currentItem, newData);
 };
 
@@ -24,12 +24,18 @@ const toggleCheckedFilter = function () {
   this.hideCheckedItems = !this.hideCheckedItems;
 };
 
+function setError(error) {
+  this.error = error;
+};
+
 export default {
   items,
+  error,
   hideCheckeditems,
   findById,
   addItem,
   findAndDelete,
   toggleCheckedFilter,
-  findAndUpdate
+  findAndUpdate,
+  setError
 };

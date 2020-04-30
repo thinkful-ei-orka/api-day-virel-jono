@@ -55,6 +55,10 @@ const handleNewItemSubmit = function () {
       .then((newItem) => {
         store.addItem(newItem);
         render();
+      })
+      .catch(err => {
+        store.setError(err.message);
+        render();
       });
   });
 };
@@ -66,14 +70,18 @@ const getItemIdFromElement = function (item) {
 };
 
 const handleDeleteItemClicked = function () {
-  // like in `handleItemCheckClicked`, we use event delegation
   $('.js-shopping-list').on('click', '.js-item-delete', event => {
-    // get the index of the item in store.items
     const id = getItemIdFromElement(event.currentTarget);
-    // delete the item
-    store.findAndDelete(id);
-    // render the updated shopping list
-    render();
+    api.deleteItem(id)
+    .then(res => res.json())
+    .then(() => {
+      store.findAndDelete(id);
+      render();
+    })
+    .catch(err => {
+      store.setError(err.message);
+      render();
+    });
   });
 };
 
@@ -82,14 +90,33 @@ const handleEditShoppingItemSubmit = function () {
     event.preventDefault();
     const id = getItemIdFromElement(event.currentTarget);
     const itemName = $(event.currentTarget).find('.shopping-item').val();
-    render();
+    api.updateItem(id, itemName)
+    .then(res => res.json())
+    .then((itemName) => {
+      store.findAndUpdate(id, itemName);
+      render();
+    })
+    .catch(err => {
+      store.setError(err.message);
+      render();
+    });
   });
 };
 
 const handleItemCheckClicked = function () {
   $('.js-shopping-list').on('click', '.js-item-toggle', event => {
-    const id = getItemIdFromElement(event.currentTarget);
-    render();
+    const id = getItemIdFromElement(event.currentTarget)
+    let item = store.findById(id);
+
+    api.updateItem(id, {checked: !item.checked})
+    .then(() => {
+      store.findAndUpdate(id,  {checked: !item.checked});
+      render();
+    })
+    .catch(err => {
+      store.setError(err.message);
+      render();
+    });
   });
 };
 
@@ -97,7 +124,7 @@ const handleToggleFilterClick = function () {
   $('.js-filter-checked').click(() => {
     store.toggleCheckedFilter();
     render();
-  });
+  })
 };
 
 const bindEventListeners = function () {
